@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -7,6 +8,11 @@ from bs4 import BeautifulSoup
 BLOG_URL = "https://claude.com/blog"
 BASE_URL = "https://claude.com"
 STATE_FILE = os.path.join(os.path.dirname(__file__), "data", "last_posts.json")
+
+DATE_PATTERN = re.compile(
+    r"(?:January|February|March|April|May|June|July|August|September|October|November|December|"
+    r"Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2},\s+\d{4}"
+)
 
 
 def is_blog_post_url(url):
@@ -16,6 +22,21 @@ def is_blog_post_url(url):
     if "/blog/category/" in url:
         return False
     return True
+
+
+def slug_to_title(slug):
+    """Convert URL slug to readable title."""
+    return slug.replace("-", " ").title()
+
+
+def find_date(element):
+    """Find a date string inside an element's text."""
+    for div in element.find_all("div"):
+        text = div.get_text(strip=True)
+        m = DATE_PATTERN.search(text)
+        if m:
+            return m.group()
+    return ""
 
 
 def fetch_posts():
@@ -29,10 +50,7 @@ def fetch_posts():
 
     for item in soup.select("div.w-dyn-item"):
         link = item.find("a", href=True)
-        title_el = item.select_one("h2.card_blog_title") or item.find("h2")
-        time_el = item.find("time")
-
-        if not link or not title_el:
+        if not link:
             continue
 
         href = link["href"]
@@ -44,11 +62,21 @@ def fetch_posts():
             continue
         seen.add(url)
 
-        posts.append({
-            "title": title_el.get_text(strip=True),
-            "url": url,
-            "date": time_el.get_text(strip=True) if time_el else "",
-        })
+        # Try h2 title first, then link text, then slug
+        title_el = item.select_one("h2.card_blog_title") or item.find("h2")
+        if title_el:
+            title = title_el.get_text(strip=True)
+        else:
+            link_text = link.get_text(strip=True)
+            if link_text:
+                title = link_text
+            else:
+                slug = url.rstrip("/").split("/")[-1]
+                title = slug_to_title(slug)
+
+        date = find_date(item)
+
+        posts.append({"title": title, "url": url, "date": date})
 
     return posts
 
@@ -103,6 +131,13 @@ def main():
         return
 
     seen_urls = load_seen_urls()
+
+    # Optional: filter by month (e.g. FILTER_MONTH="Apr 2026")
+    filter_month = os.environ.get("FILTER_MONTH", "")
+    if filter_month:
+        parts = filter_month.lower().split()
+        posts = [p for p in posts if all(part in p["date"].lower() for part in parts)]
+
     new_posts = [p for p in posts if p["url"] not in seen_urls]
 
     if not new_posts:
