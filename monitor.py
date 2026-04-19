@@ -101,23 +101,7 @@ def save_seen_urls(urls):
 def send_slack_notification(post, webhook_url):
     """Send a Slack message for a new blog post."""
     payload = {
-        "blocks": [
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "📢 Claude Blog 새 글",
-                    "emoji": True,
-                },
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"*<{post['url']}|{post['title']}>*\n📅 {post['date']}",
-                },
-            },
-        ],
+        "text": f"{post['date']} - <{post['url']}|{post['title']}>",
     }
     resp = requests.post(webhook_url, json=payload, timeout=10)
     resp.raise_for_status()
