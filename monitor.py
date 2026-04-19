@@ -1,6 +1,7 @@
 import json
 import os
 import re
+from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -139,6 +140,17 @@ def main():
         posts = [p for p in posts if all(part in p["date"].lower() for part in parts)]
 
     new_posts = [p for p in posts if p["url"] not in seen_urls]
+
+    # Sort oldest first so the most recent post is sent last
+    def parse_date(d):
+        for fmt in ("%B %d, %Y", "%b %d, %Y"):
+            try:
+                return datetime.strptime(d, fmt)
+            except ValueError:
+                continue
+        return datetime.min
+
+    new_posts.sort(key=lambda p: parse_date(p["date"]))
 
     if not new_posts:
         print(f"No new posts. ({len(posts)} posts checked)")
