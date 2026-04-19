@@ -1,3 +1,17 @@
 {
-  "seen_urls": []
+  "seen_urls": [
+    "https://claude.com/blog/best-practices-for-using-claude-opus-4-7-with-claude-code",
+    "https://claude.com/blog/carta-healthcare-clinical-abstractor",
+    "https://claude.com/blog/claude-code-desktop-redesign",
+    "https://claude.com/blog/claude-managed-agents",
+    "https://claude.com/blog/cowork-for-enterprise",
+    "https://claude.com/blog/harnessing-claudes-intelligence",
+    "https://claude.com/blog/introducing-routines-in-claude-code",
+    "https://claude.com/blog/multi-agent-coordination-patterns",
+    "https://claude.com/blog/preparing-your-security-program-for-ai-accelerated-offense",
+    "https://claude.com/blog/seeing-like-an-agent",
+    "https://claude.com/blog/subagents-in-claude-code",
+    "https://claude.com/blog/the-advisor-strategy",
+    "https://claude.com/blog/using-claude-code-session-management-and-1m-context"
+  ]
 }
