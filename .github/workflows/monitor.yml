@@ -27,7 +27,6 @@ jobs:
         run: python monitor.py
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          FILTER_MONTH: "Apr 2026"
 
       - name: Commit state changes
         run: |

@@ -101,7 +101,7 @@ def save_seen_urls(urls):
 def send_slack_notification(post, webhook_url):
     """Send a Slack message for a new blog post."""
     payload = {
-        "text": f"{post['date']} - <{post['url']}|{post['title']}>",
+        "text": f"<{post['url']}|{post['title']}>",
     }
     resp = requests.post(webhook_url, json=payload, timeout=10)
     resp.raise_for_status()
@@ -116,13 +116,6 @@ def main():
         return
 
     seen_urls = load_seen_urls()
-
-    # Optional: filter by month (e.g. FILTER_MONTH="Apr 2026")
-    filter_month = os.environ.get("FILTER_MONTH", "")
-    if filter_month:
-        parts = filter_month.lower().split()
-        posts = [p for p in posts if all(part in p["date"].lower() for part in parts)]
-
     new_posts = [p for p in posts if p["url"] not in seen_urls]
 
     # Sort oldest first so the most recent post is sent last
